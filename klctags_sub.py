@@ -13,7 +13,7 @@ import subprocess
 
 
 d = os.path.dirname(__file__)
-k = os.path.join(d, "KLTags.py")
+k = os.path.join(d, "klctags.py")
 i = sys.argv[1:]
 cmd = "python {} {}".format(k, " ".join(i))
 
