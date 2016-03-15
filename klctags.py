@@ -189,6 +189,42 @@ class OperatorParser(KLObjectCTagsParser):
     identifier = "operator"
 
 
+class RequireParser(KLObjectCTagsParser):
+    file_scope = "r"
+    identifier = "require"
+
+    @classmethod
+    def run(self, file_path, ext, kl_objs, parent=None):
+
+        res = []
+        for kl in kl_objs:
+
+            tag_name = kl
+            where = file_path
+
+            # ex_cmds
+            line_number = self._get_line_number(
+                file_path,
+                re.compile(self.get_exp_for_pattern(tag_name)))
+
+            if not line_number:
+                continue
+
+            ex_cmd = '{};"'.format(line_number)
+
+            # extension_fields
+            extension_fields = self.get_extension_field(ext, kl, parent)
+
+            res.append("{tag_name}\t{file_name}\t{ex_cmd}\t{extension_fields}".format(
+                tag_name=tag_name,
+                file_name=where,
+                ex_cmd=ex_cmd,
+                extension_fields=extension_fields
+            ))
+
+        return res
+
+
 ##############################################################################
 
 
@@ -225,6 +261,7 @@ def parse_file(kl_file):
     except AttributeError:
         ext_name = ""
 
+    requires = kl_file.getRequires()
     interfaces = kl_file.getInterfaces()
     structs = kl_file.getStructs()
     objects = kl_file.getObjects()
@@ -237,6 +274,7 @@ def parse_file(kl_file):
         operators = None
 
     res = []
+    res.extend(RequireParser.run(filepath, ext_name, requires))
     res.extend(StructParser.run(filepath, ext_name, structs))
     res.extend(ObjectParser.run(filepath, ext_name, objects))
     res.extend(InterfacesParser.run(filepath, ext_name, interfaces))
