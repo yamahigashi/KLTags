@@ -1,0 +1,51 @@
+--- KLFileImpl.py	Wed Jan 27 19:59:54 2016
++++ KLFileImpl.py	Tue Mar 15 12:06:16 2016
+@@ -35,12 +35,12 @@
+     self.__fileName = fileName
+ 
+     # try if this file exists as an original
+-    jsonFolder = os.path.split(extension.getFilePath())[0]
+-    relFolder = jsonFolder
+-    try:
+-      relFolder = os.path.relpath(jsonFolder, os.environ['FABRIC_EXTS_PATH'].split(os.pathsep)[0])
+-    except ValueError as e:
+-      pass
++    # jsonFolder = os.path.split(extension.getFilePath())[0]
++    # relFolder = jsonFolder
++    # try:
++    #   relFolder = os.path.relpath(jsonFolder, os.environ['FABRIC_EXTS_PATH'].split(os.pathsep)[0])
++    # except ValueError as e:
++    #   pass
+ 
+     # hmathee: FE-4549: disabling this - doesn't seem to be required anymore
+     # sgDir = os.path.join(os.environ['FABRIC_SCENE_GRAPH_DIR'], 'Native', 'Exts', relFolder)
+@@ -239,6 +239,18 @@
+     content = []
+     for decl in self.__decls:
+       if isinstance(decl, KLFunction) and not isinstance(decl, KLMethod) and not isinstance(decl, KLOperator):
++        if decl.isInternal() and not includeInternal:
++          continue
++        if decl.getComments().getSingleQualifier('category', category) != category and category:
++          continue
++        content += [decl]
++    return content
++
++  def getFreeOperators(self, includeInternal = False, category = None):
++    content = []
++    for decl in self.__decls:
++      # if not isinstance(decl, KLFunction) and not isinstance(decl, KLMethod) and isinstance(decl, KLOperator):
++      if isinstance(decl, KLOperator):
+         if decl.isInternal() and not includeInternal:
+           continue
+         if decl.getComments().getSingleQualifier('category', category) != category and category:
+--- KLManagerImpl.py	Wed Jan 27 19:59:54 2016
++++ KLManagerImpl.py	Wed Mar 09 20:00:58 2016
+@@ -89,6 +89,8 @@
+ 
+   @staticmethod
+   def getInstance():
++    if not KLManager.__instance:
++      KLManager.__instance = KLManager()
+     return KLManager.__instance
+ 
+   def reportError(self, message):
