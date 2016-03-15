@@ -6,7 +6,7 @@ klctags generator
 
 ## Install
 
-* clone or dowrload repo
+* clone or download repo
 * append "klctags" directory to $PATH or (%PATH% in windows)
 * apply patches, see patches folder
 
