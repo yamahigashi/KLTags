@@ -7,7 +7,12 @@ klctags generator
 
 * clone or dowrload repo
 * append "klctags" directory to $PATH or (%PATH% in windows)
- 
+* apply patches, see patches folder
+
+    * FabricEngine.Sphinx.ASTWrapper
+    * FabricEngine.Sphinx.Directive
+    
+    in Fabric distributed python folder.
 
 ## Usage
 
