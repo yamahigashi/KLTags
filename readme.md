@@ -31,11 +31,11 @@ optional arguments:
   -f [FILE], --file [FILE]
                         a input kl file to generate
   -o [OUTPUT], --output [OUTPUT]
-                        output tags file name. if not supplyed and enabled -b,
-                        using kl.builtin.ctags as default if not supplyed and
-                        enabled -c, using kl.user.ctags as default if not
-                        supplyed and enabled -f, using stdout as default
-                        output
+                        output tags file name. if not output specified and -b
+                        enabled, using kl.builtin.ctags as default if not
+                        output specified and -c enabled, using kl.user.ctags
+                        as default if not output specified and -f enabled,
+                        using stdout as default output
 
 ```
 
