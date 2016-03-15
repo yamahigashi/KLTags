@@ -19,7 +19,7 @@ class KLObjectCTagsParser(object):
     identifier = ""
 
     @classmethod
-    def _get_line_number(self, file_path, lookup_exp):
+    def _get_line_address(self, file_path, lookup_exp, line=True):
         """ return line number where lookup matches.
 
         file_path:
@@ -31,8 +31,10 @@ class KLObjectCTagsParser(object):
         with open(file_path) as f:
             for num, line in enumerate(f, 1):
                 if lookup_exp.search(line):
-                    # return str(num)
-                    return "/^{}$/".format(line.rstrip())
+                    if line:
+                        return str(num)
+                    else:
+                        return "/^{}$/".format(line.rstrip())
             else:
                 # print "not match {} in {}".format(lookup_exp.pattern, file_path)
                 return ""
@@ -61,11 +63,13 @@ class KLObjectCTagsParser(object):
 
     @classmethod
     def get_extension_field_elements(self, ext, kl, parent=None):
-        file_scope = "kind:{}".format(self.file_scope)
-        access = "access:public"
-        namespace = "namespace:None"  # "namespace:{}".format(ext)
+        res = []
+        res.append("kind:{}".format(self.file_scope))
+        # res.append("access:public")
+        if ext:
+            res.append("namespace:{}".format(ext))
 
-        return [file_scope, access, namespace]
+        return res
 
     @classmethod
     def get_extension_field(self, ext, kl, parent=None):
@@ -83,7 +87,7 @@ class KLObjectCTagsParser(object):
             where = file_path
 
             # ex_cmds
-            line_number = self._get_line_number(
+            line_number = self._get_line_address(
                 file_path,
                 re.compile(self.get_exp_for_pattern(tag_name)))
 
@@ -203,7 +207,7 @@ class RequireParser(KLObjectCTagsParser):
             where = file_path
 
             # ex_cmds
-            line_number = self._get_line_number(
+            line_number = self._get_line_address(
                 file_path,
                 re.compile(self.get_exp_for_pattern(tag_name)))
 
@@ -230,7 +234,7 @@ class RequireParser(KLObjectCTagsParser):
 
 def header():
     h = textwrap.dedent("""
-        !_TAG_FILE_ENCODING	UTF-8	//
+        !_TAG_FILE_ENCODING	cp932	//
         !_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
         !_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
     """).lstrip()
