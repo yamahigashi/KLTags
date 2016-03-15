@@ -1,3 +1,4 @@
+
 ## klctags
 
 klctags generator
@@ -9,15 +10,56 @@ klctags generator
 * append "klctags" directory to $PATH or (%PATH% in windows)
 * apply patches, see patches folder
 
-    * FabricEngine.Sphinx.ASTWrapper
-    * FabricEngine.Sphinx.Directive
+    * ASTWrapper.diff
+    * Directive.diff
     
-    in Fabric distributed python folder.
+    in Fabric distributed python folder respectively.
+    
+#### patching instruction
+
+* open command prompt as Admin
+* cd Fabric's Python directory (%FABRIC_DIR%/Python/2.7/FabricEngine/Sphinx/ASTWrapper)
+* ```patch < your_klctags_cloned_folder/patches/ASTWrapper.diff```
+* cd Python/2.7/FabricEngine/Sphinx/Directives
+* ```patch < your_klctags_cloned_folder/patches/Directives.diff```
+* done!
+
+``` console
+d:\>cd fabric\latest\Python\2.7\FabricEngine\Sphinx\ASTWrapper
+
+d:\fabric\latest\Python\2.7\FabricEngine\Sphinx\ASTWrapper>patch < d:\fabric\tools\klctags\patches\ASTWrapper.diff
+patching file KLFileImpl.py
+patching file KLManagerImpl.py
+
+d:\fabric\latest\Python\2.7\FabricEngine\Sphinx\ASTWrapper>cd ..\Directives
+
+d:\fabric\latest\Python\2.7\FabricEngine\Sphinx\Directives>patch < d:\fabric\tools\klctags\patches\Directive.diff
+patching file KLBaseDirectiveImpl.py
+patching file KLConstantDirectiveImpl.py
+patching file KLCssDirectiveImpl.py
+patching file KLExtensionConstantListDirectiveImpl.py
+patching file KLExtensionFileListDirectiveImpl.py
+patching file KLExtensionFunctionListDirectiveImpl.py
+patching file KLExtensionInterfaceListDirectiveImpl.py
+patching file KLExtensionListDirectiveImpl.py
+patching file KLExtensionTypeListDirectiveImpl.py
+patching file KLFileDirectiveImpl.py
+patching file KLFileExampleDirectiveImpl.py
+patching file KLFunctionDirectiveImpl.py
+patching file KLInheritanceDirectiveImpl.py
+patching file KLInterfaceDirectiveImpl.py
+patching file KLMethodDirectiveImpl.py
+patching file KLMethodListDirectiveImpl.py
+patching file KLTypeDirectiveImpl.py
+patching file KLXRefRoleImpl.py
+
+d:\fabric\latest\Python\2.7\FabricEngine\Sphinx\Directives>
+```
 
 ## Usage
 
 * source your fabric engine environment.bat for access fe core client via python scripts.
-* run ```klctags -h ```
+* see help, run ```klctags -h ```
 
 ``` console
 D:\fabric>klctags -h
@@ -36,15 +78,20 @@ optional arguments:
                         output specified and -c enabled, using kl.user.ctags
                         as default if not output specified and -f enabled,
                         using stdout as default output
-
 ```
+
+* ```klctags -b``` generates kl.builtin.ctags for built extensions.
+* ```klctags -c``` generates kl.user.ctags for user extensions.
+    These extension is that included in envvar ```FABRIC_EXT_PATH``` but exclude the builtin.
+* ```klctags -f some.kl``` output some.kl's tags on stdout.
+* ```klctgas -f some.kl -o some.ctags``` generates some.ctags for some.kl
 
 
 ## Using with Vim
 
 * sample _vimrc for Tagbar
 ``` vim
-""" fabric engine + tagbar integration
+""" Fabric Engine + Tagbar integration
 let $FABRIC_DIR="D:/fabric/release"
 let $PATH=$FABRIC_DIR."/bin;".$PATH
 let $PYTHONPATH=$FABRIC_DIR."/Python/2.7;".$PYTHONPATH
