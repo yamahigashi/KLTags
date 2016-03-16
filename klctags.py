@@ -19,22 +19,22 @@ class KLObjectCTagsParser(object):
     identifier = ""
 
     @classmethod
-    def _get_line_address(self, file_path, lookup_exp, line=True):
+    def _get_line_address(self, file_path, lookup_exp):
         """ return line number where lookup matches.
 
         file_path:
             filepath string
         lookup_exp:
             typeof comiled RegExp
+
+        returns:
+            [line_number, line_representation]
         """
 
         with open(file_path) as f:
             for num, line in enumerate(f, 1):
                 if lookup_exp.search(line):
-                    if line:
-                        return str(num)
-                    else:
-                        return "/^{}$/".format(line.rstrip())
+                    return [str(num), "/^{}$/".format(line.rstrip())]
             else:
                 # print "not match {} in {}".format(lookup_exp.pattern, file_path)
                 return ""
@@ -52,7 +52,7 @@ class KLObjectCTagsParser(object):
             ext_name = kl.getExtension()
 
             # method
-            methods = kl.getMethods()
+            methods = kl.getMethods(includeInherited=True)
             res.extend(MethodParser.run(kl_file, ext_name, methods, kl))
 
             # member
@@ -78,27 +78,32 @@ class KLObjectCTagsParser(object):
         return extension_fields
 
     @classmethod
+    def get_tag_name(self, file_path, ext, kl, parent):
+        return kl.getName()
+
+    @classmethod
     def run(self, file_path, ext, kl_objs, parent=None):
 
         res = []
         for kl in kl_objs:
 
-            tag_name = kl.getName()
+            tag_name = self.get_tag_name(file_path, ext, kl, parent)
             where = file_path
 
             # ex_cmds
-            line_number = self._get_line_address(
+            tag_address = self._get_line_address(
                 file_path,
                 re.compile(self.get_exp_for_pattern(tag_name)))
 
-            if not line_number:
-                # print "continue no line_number {}".format(tag_name)
+            if not tag_address:
+                # print "continue no tag_address {}".format(tag_name)
                 continue
 
-            ex_cmd = '{};"'.format(line_number)
+            ex_cmd = '{};"'.format(tag_address[1])
 
             # extension_fields
             extension_fields = self.get_extension_field(ext, kl, parent)
+            extension_fields += "\t{}:{}".format("line", tag_address[0])
 
             res.append("{tag_name}\t{file_name}\t{ex_cmd}\t{extension_fields}".format(
                 tag_name=tag_name,
@@ -138,6 +143,7 @@ class ObjectParser(KLObjectCTagsParser):
 
 
 class FunctionParser(KLObjectCTagsParser):
+
     """ free function """
 
     file_scope = "f"
@@ -147,6 +153,13 @@ class FunctionParser(KLObjectCTagsParser):
 class MethodParser(KLObjectCTagsParser):
     file_scope = "m"
     identifier = "function"
+
+    @classmethod
+    def get_exp_for_pattern(self, tag_name):
+        # function keyword be optional
+        # print tag_name
+        return r"(function|inline)[\s\t]+.*{}[\s\t\(?!]".format(tag_name)
+        # return r"[\d\w]+[\s\t]+{}([^\w\d]+=|;)".format(tag_name)
 
     @classmethod
     def get_extension_field_elements(self, ext, kl, parent=None):
@@ -198,35 +211,8 @@ class RequireParser(KLObjectCTagsParser):
     identifier = "require"
 
     @classmethod
-    def run(self, file_path, ext, kl_objs, parent=None):
-
-        res = []
-        for kl in kl_objs:
-
-            tag_name = kl
-            where = file_path
-
-            # ex_cmds
-            line_number = self._get_line_address(
-                file_path,
-                re.compile(self.get_exp_for_pattern(tag_name)))
-
-            if not line_number:
-                continue
-
-            ex_cmd = '{};"'.format(line_number)
-
-            # extension_fields
-            extension_fields = self.get_extension_field(ext, kl, parent)
-
-            res.append("{tag_name}\t{file_name}\t{ex_cmd}\t{extension_fields}".format(
-                tag_name=tag_name,
-                file_name=where,
-                ex_cmd=ex_cmd,
-                extension_fields=extension_fields
-            ))
-
-        return res
+    def get_tag_name(self, file_path, ext, kl, parent):
+        return kl
 
 
 ##############################################################################
@@ -292,6 +278,13 @@ def parse_file(kl_file):
 ##############################################################################
 #
 ##############################################################################
+def sort_results(res):
+    res = list(set(res))
+    res.sort(key=lambda x: re.search("\tline:(\d+)", x).groups(1))
+
+    return res
+
+
 def generate_for_builtins(output):
     ''' generate tags for builtin extensions. '''
 
@@ -301,7 +294,7 @@ def generate_for_builtins(output):
     for f in man.getKLFiles():
         res.extend(parse_file(f))
 
-    res = list(set(res))
+    res = sort_results(res)
     output.write("\n".join(res).lstrip())
 
 
@@ -319,7 +312,7 @@ def generate_for_custom_exts(output):
     for f in man.getKLFiles():
         res.extend(parse_file(f))
 
-    res = list(set(res))
+    res = sort_results(res)
     output.write("\n".join(res).lstrip())
 
 
@@ -332,7 +325,7 @@ def generate_for_one_file(input_path, output):
     f = KLFile(input_path)
     res.extend(parse_file(f))
 
-    res = list(set(res))
+    res = sort_results(res)
     # sys.stdout = sys.__stdout__
     output.write("\n".join(res).lstrip())
 
