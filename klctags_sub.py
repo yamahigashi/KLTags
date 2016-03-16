@@ -17,7 +17,8 @@ k = os.path.join(d, "klctags.py")
 i = sys.argv[1:]
 cmd = "python {} {}".format(k, " ".join(i))
 
-p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 stdout_data, stderr_data = p.communicate()
-print stdout_data
+# stdout_data, stderr_data = p.check_output("echo hi", shell=True, universal_newlines=True)
+print(stdout_data.lstrip().rstrip().replace(('¥r'or'¥n'), '¥r¥n'))
 # print p.returncode, stdout_data, stderr_data
