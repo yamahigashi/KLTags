@@ -100,16 +100,17 @@ let $FABRIC_EXTS_PATH=$FABRIC_DIR."/Exts;".$FABRIC_DIR."/Tests"
 let $FABRIC_DFG_PATH=$FABRIC_DIR."/Presets/DFG"
 
 let g:tagbar_type_kl = {
-    \ 'ctagsbin'  : 'klctags.py',
+    \ 'ctagsbin'  : 'klctags_sub.py',
     \ 'ctagsargs' : '-f',
     \ 'kinds' : [
+        \ 'r:require:0:0',
+        \ 'f:free function:0:1',
+        \ 'p:free operator:0:1',
         \ 'o:object:0:1',
         \ 's:struct:0:1',
         \ 'i:interface:0:1',
         \ 'm:method:0:1',
         \ 'v:member:0:0',
-        \ 'f:function:0:1',
-        \ 'p:operator:0:1'
     \ ],
     \ 'sro': '.',
     \ 'kind2scope': {
